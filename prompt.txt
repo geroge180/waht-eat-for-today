@@ -1,0 +1,60 @@
+Create the full-stack lunch wheel app in C:\Users\g2025\Desktop\lunch-wheel-app
+
+Write ALL three files to disk:
+1. server.js (Express + SQLite backend)
+2. public/index.html (frontend)
+3. package.json
+
+### server.js
+Express server on port 3000, serves ./public static, SQLite database.
+
+Dependencies: express, better-sqlite3, bcryptjs, jsonwebtoken, cors
+
+Auth endpoints:
+- POST /api/register (username, password → JWT token, 100 year expiry)
+- POST /api/login (username, password → JWT token)
+- GET /api/me (verify token → {username})
+
+Menu endpoints:
+- GET /api/menu (returns {items:[], colors:[], emojis:[]})
+- PUT /api/menu (body: {items, colors, emojis})
+
+History endpoints:
+- GET /api/history (returns [{item, created_at}], latest 50)
+- POST /api/history (body: {item})
+- DELETE /api/history (clear all)
+
+Database tables: users (id, username, password_hash, created_at), menus (id, user_id, items JSON, colors JSON, emojis JSON), history (id, user_id, item, created_at)
+
+Auto-create default menu with 8 items on first login for new users.
+
+### public/index.html
+Take the existing code from C:\Users\g2025\Desktop\lunch-wheel.html as base.
+
+Key changes:
+- No localStorage for history/menu. All via API calls.
+- Add login/register modal (beautiful, frosted glass style matching the app theme).
+- On page load: check localStorage for 'token'. If exists, GET /api/me to verify, then load menu+history. If not, show empty state.
+- "转一转" and "编辑菜单" buttons: if no token → show login/register modal.
+- "切换账号" and "登出" button in the settings area.
+- API base URL: window.location.origin
+- Keep all existing wheel spinning animation, celebration animation, EMOJI_OPTIONS, color editing, etc.
+
+### package.json
+```json
+{
+  "name": "lunch-wheel",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {"start": "node server.js"},
+  "dependencies": {
+    "express": "^4.21.0",
+    "better-sqlite3": "^11.6.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "cors": "^2.8.5"
+  }
+}
+```
+
+WRITE all files. This is critical - the files must actually be saved to disk.
