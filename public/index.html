@@ -818,7 +818,7 @@
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(API + path, opts);
     const data = await res.json();
-    if (!res.ok    throw new Error(data.error || '请求失败');
+    if (!res.ok) throw new Error(data.error || '请求失败');
     return data;
   }
 
