@@ -46,6 +46,13 @@ async function initDb() {
       item TEXT NOT NULL,
       created_at TEXT DEFAULT (datetime('now','localtime'))
     );
+    CREATE TABLE IF NOT EXISTS payers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER UNIQUE NOT NULL REFERENCES users(id),
+      names TEXT NOT NULL DEFAULT '[]',
+      current_pool TEXT NOT NULL DEFAULT '[]',
+      picked_history TEXT NOT NULL DEFAULT '[]'
+    );
   `);
   saveDb();
 }
@@ -177,6 +184,70 @@ app.post('/api/history', auth, (req, res) => {
 app.delete('/api/history', auth, (req, res) => {
   run('DELETE FROM history WHERE user_id = ?', [req.user.id]);
   res.json({ ok: true });
+});
+
+// Payer
+function ensurePayer(userId) {
+  const p = db.exec('SELECT id FROM payers WHERE user_id = ' + userId);
+  if (p.length === 0) {
+    const defaultNames = ['小明', '小红', '小张', '小李'];
+    db.run('INSERT INTO payers (user_id, names, current_pool, picked_history) VALUES (?, ?, ?, ?)',
+      [userId, JSON.stringify(defaultNames), JSON.stringify(defaultNames), JSON.stringify([])]);
+    saveDb();
+  }
+}
+
+app.get('/api/payers', auth, (req, res) => {
+  ensurePayer(req.user.id);
+  const payer = queryOne('SELECT names, current_pool, picked_history FROM payers WHERE user_id = ?', [req.user.id]);
+  res.json({
+    names: JSON.parse(payer.names),
+    currentPool: JSON.parse(payer.current_pool),
+    pickedHistory: JSON.parse(payer.picked_history)
+  });
+});
+
+app.put('/api/payers', auth, (req, res) => {
+  const { names } = req.body;
+  if (!names || names.length < 2) return res.status(400).json({ error: '至少需要 2 位结账人' });
+  const namesStr = JSON.stringify(names);
+  run('UPDATE payers SET names = ?, current_pool = ?, picked_history = ? WHERE user_id = ?',
+    [namesStr, namesStr, JSON.stringify([]), req.user.id]);
+  res.json({ names, currentPool: [...names], pickedHistory: [] });
+});
+
+app.post('/api/payers/pick', auth, (req, res) => {
+  ensurePayer(req.user.id);
+  const payer = queryOne('SELECT names, current_pool, picked_history FROM payers WHERE user_id = ?', [req.user.id]);
+  let pool = JSON.parse(payer.current_pool);
+  let pickedHistory = JSON.parse(payer.picked_history);
+  const allNames = JSON.parse(payer.names);
+
+  // If pool is empty, reset it from the full names list
+  if (pool.length === 0) {
+    pool = [...allNames];
+    pickedHistory = [];
+  }
+
+  // Pick a random person from the pool
+  const idx = Math.floor(Math.random() * pool.length);
+  const picked = pool[idx];
+  pool.splice(idx, 1);
+  pickedHistory.push(picked);
+
+  // If pool is empty after this pick, reset for next time
+  let nextPool;
+  if (pool.length === 0) {
+    nextPool = [...allNames];
+    pickedHistory = [];
+  } else {
+    nextPool = pool;
+  }
+
+  run('UPDATE payers SET current_pool = ?, picked_history = ? WHERE user_id = ?',
+    [JSON.stringify(nextPool), JSON.stringify(pickedHistory), req.user.id]);
+
+  res.json({ picked, remainingPool: nextPool, pickedHistory });
 });
 
 initDb().then(() => {

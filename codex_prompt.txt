@@ -1,0 +1,69 @@
+You are tasked with completely rewriting a "Lunch Wheel" web app. The existing project is at the current directory with a Node.js backend (server.js) and a frontend (public/index.html).
+
+Read server.js and public/index.html first to understand the existing code.
+
+## EXISTING CODEBASE SUMMARY
+
+Backend (server.js - Express + sql.js + SQLite):
+- User registration/login with JWT (bcryptjs)
+- Menu CRUD (items, colors, emojis per user)
+- History tracking (what was picked and when)
+- SQLite database with tables: users, menus, history
+- Express static serving of public/index.html
+
+Frontend (public/index.html):
+- Single-page app with Canvas-based spinning wheel
+- Login/register modal
+- Edit menu modal (add/remove food items with colors/emojis)
+- Spin animation with celebration confetti
+- History display
+
+## REQUIREMENTS
+
+### 1. CHANGE: Wheel to Marquee (slot machine style)
+Replace the spinning wheel canvas with a slot-machine-style animation. Food items cycle rapidly in a vertical scrolling display and gradually slow down to one winner. Make it visually exciting with a glowing highlight effect on the winning slot. Keep the celebration confetti effect.
+
+### 2. ADD: "Today Payer" feature
+- When user spins and gets a result, also randomly pick a payer from a configurable team list.
+- Payer selection uses round-robin (递减): each person picked is removed from the pool until everyone has been picked once, then resets.
+- Users can configure the payer list (add/remove names) in a modal similar to the food editing modal.
+- New DB table: `payers` with columns: user_id (INTEGER UNIQUE), names (TEXT JSON array), current_pool (TEXT JSON array)
+- New API endpoints:
+  - GET /api/payers - get payer list, current pool, and history
+  - PUT /api/payers - update payer list (resets pool)
+  - POST /api/payers/pick - pick a payer from pool (round-robin)
+- Backend handles the round-robin logic.
+- Frontend shows: payer list with pool status, and the picked payer in the result.
+
+### 3. UI Improvements
+- Complete visual redesign - modern and polished
+- Beautiful gradient backgrounds with subtle animations
+- Glassmorphism card style
+- Smooth transitions and micro-interactions
+- Better mobile responsiveness
+- Result display shows BOTH the food AND the payer
+
+### 4. DO NOT change existing backend logic or API contracts.
+Only add new endpoints for payers. Auth, menu, and history must remain fully compatible.
+
+## TESTING
+After building, start the server with: node server.js
+Then test:
+1. User reg/login/logout
+2. The marquee spin animation
+3. History persistence
+4. Payer management (add/remove, verify round-robin)
+5. Payer pool resets correctly after all picked
+6. Mobile responsiveness
+7. Edit menu functionality
+8. Backward compatibility of existing APIs
+
+## DEPLOY
+After testing:
+1. Delete data.db so the fresh deploy starts clean
+2. Commit all changes to git
+3. Check git remote. If remote exists, push.
+4. Run: railway up (if railway CLI is available)
+
+When completely finished, run this command to notify me:
+openclaw system event --text "Done: Lunch wheel app fully rewritten with marquee UI + payer feature, tested and deployed" --mode now
