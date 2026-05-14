@@ -94,101 +94,140 @@
   .user-bar a { color: rgba(255,255,255,0.35); text-decoration: none; cursor: pointer; transition: color 0.2s; }
   .user-bar a:hover { color: #f5576c; }
 
-  /* Marquee / Slot machine */
-  .marquee-wrapper {
+  /* Grid Marquee - 9-cell rectangular marquee */
+  .grid-marquee-wrapper {
     position: relative;
-    margin-bottom: 20px;
-    padding: 16px;
+    margin: 0 auto 20px;
+    padding: 10px;
     background: rgba(0,0,0,0.25);
     border-radius: 20px;
     border: 1px solid rgba(255,255,255,0.06);
+    max-width: 420px;
+    aspect-ratio: 1;
+    width: 100%;
   }
 
-  .marquee-viewport {
+  .grid-marquee {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 6px;
+    width: 100%;
+    height: 100%;
     position: relative;
-    height: 72px;
-    overflow: hidden;
+  }
+
+  .grid-cell {
     border-radius: 14px;
-    background: rgba(0,0,0,0.3);
-    margin-bottom: 8px;
-  }
-
-  .marquee-strip {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    transition: none;
-  }
-
-  .marquee-item {
-    height: 72px;
+    background: rgba(255,255,255,0.04);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    padding: 0 24px;
-    font-size: 24px;
+    gap: 4px;
+    font-size: 14px;
     font-weight: 700;
     color: #fff;
-    letter-spacing: 1px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    text-align: center;
+    transition: all 0.15s ease;
+    overflow: hidden;
+    padding: 4px;
+    border: 1px solid transparent;
+    position: relative;
   }
-  .marquee-item .item-emoji { font-size: 28px; }
-  .marquee-item .item-name { white-space: nowrap; }
-
-  /* Glow line (win indicator) */
-  .marquee-glow {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 72px;
-    transform: translateY(-50%);
-    pointer-events: none;
-    z-index: 5;
-    border-top: 2px solid rgba(245, 87, 108, 0.6);
-    border-bottom: 2px solid rgba(245, 87, 108, 0.6);
-    box-shadow:
-      0 0 20px rgba(245, 87, 108, 0.3),
-      inset 0 0 20px rgba(245, 87, 108, 0.1);
-    border-radius: 14px;
-    animation: glowPulse 2s ease-in-out infinite;
-  }
-  @keyframes glowPulse {
-    0%, 100% { box-shadow: 0 0 20px rgba(245, 87, 108, 0.3), inset 0 0 20px rgba(245, 87, 108, 0.1); }
-    50% { box-shadow: 0 0 35px rgba(245, 87, 108, 0.5), inset 0 0 30px rgba(245, 87, 108, 0.15); }
-  }
-  .marquee-glow.winner {
-    border-top: 2px solid rgba(240, 147, 251, 0.9);
-    border-bottom: 2px solid rgba(240, 147, 251, 0.9);
-    box-shadow:
-      0 0 40px rgba(240, 147, 251, 0.6),
-      0 0 80px rgba(240, 147, 251, 0.2),
-      inset 0 0 40px rgba(240, 147, 251, 0.15);
-    animation: winPulse 0.8s ease-in-out infinite;
-  }
-  @keyframes winPulse {
-    0%, 100% { box-shadow: 0 0 40px rgba(240, 147, 251, 0.6), 0 0 80px rgba(240, 147, 251, 0.2), inset 0 0 40px rgba(240, 147, 251, 0.15); }
-    50% { box-shadow: 0 0 60px rgba(240, 147, 251, 0.8), 0 0 100px rgba(240, 147, 251, 0.3), inset 0 0 50px rgba(240, 147, 251, 0.2); }
+  .grid-cell .cell-emoji { font-size: 28px; line-height: 1.2; }
+  .grid-cell .cell-name {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90%;
+    line-height: 1.2;
+    opacity: 0.85;
   }
 
-  .marquee-strip.spinning .marquee-item {
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+  /* Center cell - result display */
+  .grid-cell.center-cell {
+    background: linear-gradient(135deg, rgba(245, 87, 108, 0.15), rgba(240, 147, 251, 0.12));
+    border: 1px solid rgba(245, 87, 108, 0.15);
+    cursor: default;
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .grid-cell.center-cell .cell-emoji { font-size: 36px; }
+  .grid-cell.center-cell .cell-name {
+    font-size: 13px;
+    font-weight: 900;
+    max-width: 100%;
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  .marquee-item:nth-child(odd) {
+  .grid-cell.preview-cell {
+    background: rgba(255,255,255,0.065);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Breathing light effect during spin */
+  .grid-cell.breathing {
+    transition: all 0.08s linear;
+  }
+  .grid-cell.bright {
+    background: rgba(245, 87, 108, 0.25);
+    border-color: rgba(245, 87, 108, 0.4);
+    box-shadow: 0 0 18px rgba(245, 87, 108, 0.35);
+    transform: scale(1.04);
+    z-index: 2;
+  }
+  .grid-cell.bright .cell-emoji {
+    filter: brightness(1.3);
+  }
+  .grid-cell.bright .cell-name {
+    opacity: 1;
+  }
+  .grid-cell.dim {
     background: rgba(255,255,255,0.02);
+    border-color: transparent;
+    box-shadow: none;
+    transform: scale(1);
+  }
+  .grid-cell.dim .cell-emoji {
+    filter: brightness(0.35);
+  }
+  .grid-cell.dim .cell-name {
+    opacity: 0.25;
   }
 
-  /* Side arrows */
-  .marquee-arrows {
+  /* Winner cell (border glow) */
+  .grid-cell.winner-cell {
+    animation: winCellPulse 0.8s ease-in-out infinite;
+    border-color: rgba(240, 147, 251, 0.6) !important;
+    background: rgba(240, 147, 251, 0.12) !important;
+  }
+  @keyframes winCellPulse {
+    0%, 100% {
+      box-shadow: 0 0 15px rgba(240, 147, 251, 0.3), inset 0 0 15px rgba(240, 147, 251, 0.05);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(240, 147, 251, 0.5), inset 0 0 25px rgba(240, 147, 251, 0.1);
+    }
+  }
+
+  .grid-cell.center-cell.winner-cell {
+    box-shadow: 0 0 40px rgba(240, 147, 251, 0.5), inset 0 0 25px rgba(240, 147, 251, 0.1);
+  }
+
+  /* Arrows */
+  .grid-marquee-arrows {
     display: flex;
     justify-content: center;
     gap: 4px;
+    margin-top: 6px;
     height: 6px;
   }
-  .marquee-arrows span {
+  .grid-marquee-arrows span {
     display: inline-block;
     width: 8px;
     height: 8px;
@@ -197,10 +236,10 @@
     transform: rotate(135deg);
     animation: arrowBounce 1.5s ease-in-out infinite;
   }
-  .marquee-arrows span:nth-child(2) { animation-delay: 0.2s; }
-  .marquee-arrows span:nth-child(3) { animation-delay: 0.4s; }
-  .marquee-arrows span:nth-child(4) { animation-delay: 0.6s; }
-  .marquee-arrows span:nth-child(5) { animation-delay: 0.8s; }
+  .grid-marquee-arrows span:nth-child(2) { animation-delay: 0.2s; }
+  .grid-marquee-arrows span:nth-child(3) { animation-delay: 0.4s; }
+  .grid-marquee-arrows span:nth-child(4) { animation-delay: 0.6s; }
+  .grid-marquee-arrows span:nth-child(5) { animation-delay: 0.8s; }
 
   @keyframes arrowBounce {
     0%, 100% { opacity: 0.2; }
@@ -260,9 +299,9 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    min-height: 40px;
-    margin: 8px 0 4px;
-    padding: 12px 16px;
+    min-height: 20px;
+    margin: 0 0 0;
+    padding: 8px 16px;
     border-radius: 16px;
     background: rgba(0,0,0,0.2);
     border: 1px solid rgba(255,255,255,0.04);
@@ -273,25 +312,12 @@
     background: rgba(245, 87, 108, 0.12);
     border-color: rgba(245, 87, 108, 0.2);
   }
-  .result-food {
-    font-size: 22px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.85);
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .result-food.show { opacity: 1; transform: translateY(0); }
-  .result-food .emoji { font-size: 28px; }
 
   .result-payer {
     font-size: 14px;
     color: rgba(255,255,255,0.5);
-    opacity: 0;
-    transform: translateY(6px);
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s;
   }
-  .result-payer.show { opacity: 1; transform: translateY(0); }
   .result-payer .payer-name {
     display: inline-block;
     color: #4facfe;
@@ -573,15 +599,16 @@
     .container { padding: 20px 16px; border-radius: 20px; }
     .header h1 { font-size: 22px; }
     .header p { font-size: 12px; }
-    .marquee-viewport { height: 60px; }
-    .marquee-item { height: 60px; font-size: 18px; }
-    .marquee-item .item-emoji { font-size: 22px; }
-    .marquee-glow { height: 60px; }
+    .grid-marquee-wrapper { max-width: 320px; }
+    .grid-cell { gap: 2px; }
+    .grid-cell .cell-emoji { font-size: 22px; }
+    .grid-cell .cell-name { font-size: 9px; }
+    .grid-cell.center-cell .cell-emoji { font-size: 28px; }
+    .grid-cell.center-cell .cell-name { font-size: 11px; }
     .btn { padding: 10px 22px; font-size: 14px; }
     .btn-secondary { padding: 10px 16px; font-size: 12px; }
     .modal { padding: 20px 16px; }
     .panels { flex-direction: column; gap: 8px; }
-    .result-food { font-size: 18px; }
     .result-payer { font-size: 13px; }
   }
 </style>
@@ -608,13 +635,24 @@
     <p>命运的跑马灯会给你答案</p>
   </div>
 
-  <!-- Marquee / Slot Machine -->
-  <div class="marquee-wrapper">
-    <div class="marquee-viewport" id="marqueeViewport">
-      <div class="marquee-glow" id="marqueeGlow"></div>
-      <div class="marquee-strip" id="marqueeStrip"></div>
+  <!-- Grid Marquee / 9-cell rectangular marquee -->
+  <div class="grid-marquee-wrapper">
+    <div class="grid-marquee" id="gridMarquee">
+      <!-- 9 cells: 0-7 are positional, center (index 8) shows result -->
+      <div class="grid-cell" data-pos="0"><span class="cell-emoji">🤔</span><span class="cell-name">?</span></div>
+      <div class="grid-cell" data-pos="1"><span class="cell-emoji">🤔</span><span class="cell-name">?</span></div>
+      <div class="grid-cell" data-pos="2"><span class="cell-emoji">🤔</span><span class="cell-name">?</span></div>
+      <div class="grid-cell" data-pos="3"><span class="cell-emoji">🤔</span><span class="cell-name">?</span></div>
+      <div class="grid-cell center-cell" id="gridCenterCell">
+        <span class="cell-emoji">🎰</span>
+        <span class="cell-name">转一转</span>
+      </div>
+      <div class="grid-cell" data-pos="4"><span class="cell-emoji">🤔</span><span class="cell-name">?</span></div>
+      <div class="grid-cell" data-pos="5"><span class="cell-emoji">🤔</span><span class="cell-name">?</span></div>
+      <div class="grid-cell" data-pos="6"><span class="cell-emoji">🤔</span><span class="cell-name">?</span></div>
+      <div class="grid-cell" data-pos="7"><span class="cell-emoji">🤔</span><span class="cell-name">?</span></div>
     </div>
-    <div class="marquee-arrows">
+    <div class="grid-marquee-arrows">
       <span></span><span></span><span></span><span></span><span></span>
     </div>
   </div>
@@ -626,12 +664,8 @@
     <button class="btn btn-secondary" id="editPayersBtn" style="display:none">👥 结账人</button>
   </div>
 
-  <!-- Result -->
+  <!-- Result (payer only; food result shows in center cell) -->
   <div class="result-panel" id="resultPanel">
-    <div class="result-food" id="resultFood">
-      <span class="emoji" id="resultEmoji">🤔</span>
-      <span id="resultLabel">登录后开始转转盘吧</span>
-    </div>
     <div class="result-payer" id="resultPayer"></div>
   </div>
 
@@ -713,6 +747,26 @@
   const API = window.location.origin;
   const EMOJI_OPTIONS = ['🥟','🍜','🥗','🍱','🐟','🍗','🍣','🥩','🥘','🍲','🍝','🌮','🌯','🫔','🥪','🧆','🍳','🥓','🍔','🌭','🧁','🍰','🎂','🍨','🍩','🍪','☕','🧋','🥤','🍺','🍷','🥃','🍵','🧃','🍙','🌽','🥨','🥖','🍕','🥐','🫓','🧇','🥞','🫕','🥡','🍛','🍚','🥠','🫘','🧈','🥜','🫐','🍇','🍑','🥝','🍌'];
 
+  function refreshGridPreview() {
+    // Show first 8 items (or fewer) in the 8 grid cells as a preview
+    if (items.length === 0) {
+      cells.forEach(cell => {
+        cell.querySelector('.cell-emoji').textContent = '🤔';
+        cell.querySelector('.cell-name').textContent = '?';
+      });
+      return;
+    }
+    const count = items.length;
+    const startIdx = Math.floor(Math.random() * count);
+    cells.forEach((cell, pos) => {
+      const idx = (startIdx + pos) % count;
+      cell.querySelector('.cell-emoji').textContent = emojis[idx % emojis.length];
+      const nameEl = cell.querySelector('.cell-name');
+      nameEl.textContent = items[idx];
+      nameEl.style.color = colors[idx % colors.length];
+    });
+  }
+
   // ---- State ----
   let items = ['麻辣烫','牛肉面','轻食沙拉','日料定食','酸菜鱼','黄焖鸡','螺蛳粉','广式茶点'];
   let colors = ['#FF6B6B','#4ECDC4','#FFB347','#5B86E5','#A68CDE','#F7DC6F','#82CCDD','#E56B9D'];
@@ -727,86 +781,200 @@
   let authMode = 'login';
   let spinning = false;
 
-  // ---- Marquee / Slot machine ----
-  const viewport = document.getElementById('marqueeViewport');
-  const strip = document.getElementById('marqueeStrip');
-  const glow = document.getElementById('marqueeGlow');
-  let marqueeAnimId = null;
-  let marqueeOffset = 0;
-  let marqueeSpeed = 0;
-  let marqueeTargetIdx = -1;
+  // ---- Grid Marquee / breathing light (chaser) effect ----
+  const grid = document.getElementById('gridMarquee');
+  const centerCell = document.getElementById('gridCenterCell');
+  const cells = grid.querySelectorAll('.grid-cell[data-pos]');
+  let gridAnimId = null;
+  let gridTargetItemIdx = -1;
 
-  function buildMarqueeItems() {
-    // Build a long strip with items repeated many times for smooth scrolling
-    strip.innerHTML = '';
-    const repeats = 20; // enough for scrolling
-    for (let r = 0; r < repeats; r++) {
-      items.forEach((item, i) => {
-        const div = document.createElement('div');
-        div.className = 'marquee-item';
-        div.dataset.index = i;
-        div.innerHTML = `<span class="item-emoji">${emojis[i % emojis.length]}</span><span class="item-name" style="color:${colors[i % colors.length]}">${item}</span>`;
-        strip.appendChild(div);
+  // Chaser path order: clockwise around the 8 perimeter cells
+  // 0→1→2→3→4→5→6→7 → 0
+  // Visual positions:
+  // 0: top-left,   1: top-center,   2: top-right
+  // 7: middle-left,                 3: middle-right
+  // 6: bottom-left,5: bottom-center,4: bottom-right
+  const CHASER_ORDER = [0, 1, 2, 3, 4, 5, 6, 7];
+
+  function resetGridPreview() {
+    if (items.length === 0) {
+      cells.forEach(cell => {
+        cell.querySelector('.cell-emoji').textContent = '🤔';
+        cell.querySelector('.cell-name').textContent = '?';
+        cell.classList.remove('bright', 'dim', 'winner-cell', 'breathing');
+        cell.classList.add('breathing');
       });
+      return;
     }
-    const itemHeight = strip.children.length > 0 ? strip.children[0].offsetHeight || 72 : 72;
-    viewport.style.height = itemHeight + 'px';
-    marqueeOffset = 0;
+    fillGridCells();
+    cells.forEach(c => c.classList.remove('bright', 'dim', 'winner-cell'));
+    cells.forEach(c => c.classList.add('breathing'));
+    centerCell.querySelector('.cell-emoji').textContent = '🎰';
+    centerCell.querySelector('.cell-name').textContent = '转一转';
+    centerCell.querySelector('.cell-emoji').style = '';
+    centerCell.querySelector('.cell-name').style = '';
+    centerCell.classList.remove('winner-cell');
   }
 
-  function getItemHeight() {
-    const el = strip.querySelector('.marquee-item');
-    return el ? el.offsetHeight : 72;
+  // Fill perimeter cells with items, ensuring all items are unique & shift-rotated
+  function fillGridCells() {
+    const count = items.length;
+    const offset = Math.floor(Math.random() * count);
+    // assign 8 distinct items to 8 perimeter positions (wrap around if count<8)
+    cells.forEach((cell, pos) => {
+      const idx = (offset + pos) % count;
+      cell.querySelector('.cell-emoji').textContent = emojis[idx % emojis.length];
+      const nameEl = cell.querySelector('.cell-name');
+      nameEl.textContent = items[idx];
+      nameEl.style.color = colors[idx % colors.length];
+      // store the item index so we can look it up later
+      cell.dataset.itemIdx = idx;
+    });
   }
 
-  function startMarquee() {
-    if (marqueeAnimId) cancelAnimationFrame(marqueeAnimId);
+  function startGridMarquee() {
+    if (gridAnimId) cancelAnimationFrame(gridAnimId);
     if (items.length < 2) return;
 
-    buildMarqueeItems();
-    glow.classList.remove('winner');
+    // Reset
+    cells.forEach(c => c.classList.remove('bright', 'winner-cell'));
+    cells.forEach(c => c.classList.add('breathing'));
+    centerCell.classList.remove('winner-cell');
+    centerCell.querySelector('.cell-emoji').textContent = '🌀';
+    centerCell.querySelector('.cell-name').textContent = '转动中...';
+    centerCell.querySelector('.cell-emoji').style = '';
+    centerCell.querySelector('.cell-name').style = '';
+    document.getElementById('resultPanel').classList.remove('highlight');
+    document.getElementById('resultPayer').innerHTML = '';
 
-    const ih = getItemHeight();
-    const totalItems = items.length;
-    const targetIdx = Math.floor(Math.random() * totalItems);
-    marqueeTargetIdx = targetIdx;
+    // Fill cells with shuffled items (same layout throughout the animation)
+    fillGridCells();
 
-    // Calculate animation: start fast, decelerate
-    // We need to scroll past the target multiple times then land on it
-    const loops = 5 + Math.floor(Math.random() * 3);
-    const targetOffset = (loops * totalItems + targetIdx) * ih;
-    const startOffset = 0;
-    const duration = 4000 + Math.random() * 1000;
+    const count = items.length;
+    // Pick a random target item index
+    gridTargetItemIdx = Math.floor(Math.random() * count);
+
+    const totalCycles = 5 + Math.floor(Math.random() * 3); // 5-7 full cycles
+    const totalFlashes = totalCycles * 8;
+
+    const flashDuration = 8000 + Math.random() * 2000; // 8-10 seconds
     const startTime = performance.now();
+    let lastFlashIdx = -1;
 
+    // The chaser will go around the 8 cells.
+    // For the target item: we find which cell position it's in, then
+    // stop the chaser exactly on that cell.
+    // We can simply spin the chaser for N full cycles, then stop.
     function animate(now) {
       const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
+      const progress = Math.min(elapsed / flashDuration, 1);
 
-      // Easing: cubic out for smooth deceleration
-      const ease = 1 - Math.pow(1 - progress, 3);
+      // Ease out cubic for gradual slowdown
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const totalSteps = totalFlashes - 1;
+      const step = Math.min(Math.floor(eased * totalSteps), totalSteps);
 
-      const offset = startOffset + (targetOffset - startOffset) * ease;
-      strip.style.transform = `translateY(-${offset}px)`;
+      if (step !== lastFlashIdx) {
+        lastFlashIdx = step;
+
+        const brightPos = step % 8;
+
+        cells.forEach((cell, pos) => {
+          if (pos === brightPos) {
+            cell.classList.remove('dim');
+            cell.classList.add('bright');
+            // Show the currently highlighted item in the center
+            const itemIdx = parseInt(cell.dataset.itemIdx);
+            centerCell.querySelector('.cell-emoji').textContent = emojis[itemIdx % emojis.length];
+            centerCell.querySelector('.cell-name').textContent = items[itemIdx];
+            centerCell.querySelector('.cell-name').style.color = colors[itemIdx % colors.length];
+          } else {
+            cell.classList.remove('bright');
+            cell.classList.add('dim');
+          }
+        });
+      }
 
       if (progress < 1) {
-        marqueeAnimId = requestAnimationFrame(animate);
+        gridAnimId = requestAnimationFrame(animate);
       } else {
-        // Snap to exact position
-        const finalOffset = targetOffset;
-        strip.style.transform = `translateY(-${finalOffset}px)`;
-        marqueeAnimId = null;
+        // Final flash: find which cell has our target item
+        let targetPos = -1;
+        cells.forEach((cell, pos) => {
+          if (parseInt(cell.dataset.itemIdx) === gridTargetItemIdx) {
+            targetPos = pos;
+          }
+        });
+
+        // Ensure last flash is on the target cell
+        if (targetPos >= 0) {
+          cells.forEach((cell, pos) => {
+            if (pos === targetPos) {
+              cell.classList.remove('dim');
+              cell.classList.add('bright');
+            } else {
+              cell.classList.remove('bright');
+              cell.classList.add('dim');
+            }
+          });
+        }
+
+        gridAnimId = null;
         spinning = false;
         document.getElementById('spinBtn').disabled = false;
         document.getElementById('spinBtn').textContent = '🎰 转一转';
 
-        // Show result
-        glow.classList.add('winner');
-        setTimeout(() => showResult(targetIdx), 400);
+        setTimeout(() => showGridResult(gridTargetItemIdx), 300);
       }
     }
 
-    marqueeAnimId = requestAnimationFrame(animate);
+    gridAnimId = requestAnimationFrame(animate);
+  }
+
+  function showGridResult(idx) {
+    // Update center cell with winner
+    centerCell.classList.add('winner-cell');
+    centerCell.querySelector('.cell-emoji').textContent = emojis[idx % emojis.length];
+    const nameEl = centerCell.querySelector('.cell-name');
+    nameEl.textContent = '今天吃 ' + items[idx] + ' 🎉';
+    nameEl.style.color = colors[idx % colors.length];
+    nameEl.style['-webkit-text-fill-color'] = colors[idx % colors.length];
+    nameEl.style['background-clip'] = 'unset';
+    nameEl.style['-webkit-background-clip'] = 'unset';
+    nameEl.style.background = 'none';
+
+    // Also highlight the border position where it landed
+    document.getElementById('resultPanel').classList.add('highlight');
+
+    // Pick payer
+    (async () => {
+      try {
+        const pick = await api('/api/payers/pick', 'POST');
+        payerPool = pick.remainingPool;
+        payerHistory = pick.pickedHistory;
+        const pickedName = pick.picked;
+        document.getElementById('resultPayer').innerHTML = '💰 今日结账：<span class="payer-name">' + pickedName + '</span>';
+        renderPayerStatus();
+      } catch(e) {
+        document.getElementById('resultPayer').innerHTML = '';
+      }
+    })();
+
+    startCelebration();
+
+    // Save history
+    (async () => {
+      try {
+        await api('/api/history', 'POST', { item: items[idx] });
+        const d = new Date();
+        const ds = d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
+        const ts = d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        history.unshift({ item: items[idx], time: ds + ' ' + ts });
+        renderHistory();
+      } catch(e) {
+        console.error('save history failed:', e);
+      }
+    })();
   }
 
   // ---- API helpers ----
@@ -874,15 +1042,16 @@
     payerNames = [];
     payerPool = [];
     payerHistory = [];
-    if (marqueeAnimId) cancelAnimationFrame(marqueeAnimId);
-    buildMarqueeItems();
-    strip.style.transform = 'translateY(0)';
-    glow.classList.remove('winner');
-    document.getElementById('resultFood').classList.remove('show');
-    document.getElementById('resultPayer').classList.remove('show');
-    document.getElementById('resultLabel').textContent = '登录后开始转转盘吧';
-    document.getElementById('resultEmoji').textContent = '🤔';
+    if (gridAnimId) cancelAnimationFrame(gridAnimId);
+    cells.forEach(c => c.classList.remove('spinning-cell', 'winner-cell', 'bright', 'dim'));
+    centerCell.classList.remove('winner-cell');
+    centerCell.querySelector('.cell-emoji').textContent = '🤔';
+    centerCell.querySelector('.cell-name').textContent = '登录后转转';
+    centerCell.querySelector('.cell-emoji').style = '';
+    centerCell.querySelector('.cell-name').style = '';
+    document.getElementById('resultPanel').classList.remove('highlight');
     document.getElementById('resultPayer').innerHTML = '';
+    refreshGridPreview();
     document.getElementById('historyPanel').style.display = 'none';
     document.getElementById('payerPanel').style.display = 'none';
   }
@@ -931,11 +1100,12 @@
         payerHistory = [];
       }
 
-      buildMarqueeItems();
-      strip.style.transform = 'translateY(0)';
-      glow.classList.remove('winner');
-      document.getElementById('resultLabel').textContent = '点击转转盘试试手气';
-      document.getElementById('resultEmoji').textContent = '🎰';
+      refreshGridPreview();
+      centerCell.querySelector('.cell-emoji').textContent = '🎰';
+      centerCell.querySelector('.cell-name').textContent = '转一转';
+      centerCell.querySelector('.cell-emoji').style = '';
+      centerCell.querySelector('.cell-name').style = '';
+      centerCell.classList.remove('winner-cell');
       document.getElementById('editPayersBtn').style.display = 'inline-block';
       renderHistory();
       renderPayerStatus();
@@ -951,50 +1121,7 @@
     const btn = document.getElementById('spinBtn');
     btn.disabled = true;
     btn.textContent = '🌀 转动中...';
-    document.getElementById('resultFood').classList.remove('show');
-    document.getElementById('resultPayer').classList.remove('show');
-    glow.classList.remove('winner');
-    startMarquee();
-  }
-
-  // ---- Show result ----
-  async function showResult(idx) {
-    const el = document.getElementById('resultFood');
-    const em = document.getElementById('resultEmoji');
-    const lb = document.getElementById('resultLabel');
-    const pe = document.getElementById('resultPayer');
-
-    em.textContent = emojis[idx % emojis.length];
-    lb.textContent = '今天吃：' + items[idx] + ' 🎉';
-    el.classList.add('show');
-    document.getElementById('resultPanel').classList.add('highlight');
-
-    // Pick payer
-    try {
-      const pick = await api('/api/payers/pick', 'POST');
-      payerPool = pick.remainingPool;
-      payerHistory = pick.pickedHistory;
-      const pickedName = pick.picked;
-      pe.innerHTML = '💰 今日结账：<span class="payer-name">' + pickedName + '</span>';
-      pe.classList.add('show');
-      renderPayerStatus();
-    } catch(e) {
-      pe.innerHTML = '';
-    }
-
-    startCelebration();
-
-    // Save history
-    try {
-      await api('/api/history', 'POST', { item: items[idx] });
-      const d = new Date();
-      const ds = d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
-      const ts = d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-      history.unshift({ item: items[idx], time: ds + ' ' + ts });
-      renderHistory();
-    } catch(e) {
-      console.error('save history failed:', e);
-    }
+    startGridMarquee();
   }
 
   // ---- Edit Menu ----
@@ -1097,11 +1224,14 @@
       items = ni;
       colors = nc;
       emojis = ne;
-      buildMarqueeItems();
-      strip.style.transform = 'translateY(0)';
-      glow.classList.remove('winner');
-      document.getElementById('resultFood').classList.remove('show');
-      document.getElementById('resultPayer').classList.remove('show');
+      refreshGridPreview();
+      centerCell.querySelector('.cell-emoji').textContent = '🎰';
+      centerCell.querySelector('.cell-name').textContent = '已更新';
+      centerCell.querySelector('.cell-emoji').style = '';
+      centerCell.querySelector('.cell-name').style = '';
+      centerCell.classList.remove('winner-cell');
+      document.getElementById('resultPanel').classList.remove('highlight');
+      document.getElementById('resultPayer').innerHTML = '';
       closeEdit();
     } catch(e) {
       alert('保存失败：' + e.message);
@@ -1335,7 +1465,7 @@
         updateUserBar();
       }
     }
-    buildMarqueeItems();
+    refreshGridPreview();
     updateUserBar();
   })();
 </script>
